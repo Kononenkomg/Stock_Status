@@ -6,8 +6,11 @@ import { httpBatchLink } from '@trpc/client'
 import superjson from 'superjson'
 import nextConfig from 'next.config.js'
 import Head from 'next/head'
+import dotenv from 'dotenv';
+dotenv.config();
 
-const basePath = String(nextConfig.basePath)
+// const basePath = String(nextConfig.basePath)
+const basePath = process.env.STAGE === 'development' ? '' : 'https://stock-status-ruddy.vercel.app'
 
 const MyApp = ({ Component, pageProps }: AppProps): ReactElement | null => {
 
