@@ -8,14 +8,8 @@ import {
   isTableExists,
   openDB,
 } from "@/utils/sqlite";
+import { userSchema } from "@/schemas";
 
-const userSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  email: z.string(),
-  password: z.string(),
-  role: z.string(),
-});
 
 export const authRouter = router({
   auth: procedure
@@ -41,9 +35,10 @@ export const authRouter = router({
           return {
             status: "ok",
             user: {
-              username: validatedUser.name,
+              name: validatedUser.name,
               email: validatedUser.email,
               role: user.role,
+              permissions: user.permissions,
             },
           };
         }

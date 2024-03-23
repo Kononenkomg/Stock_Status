@@ -5,6 +5,7 @@ import { User } from "@/types";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import styled from "styled-components";
+import { UserManagement } from "@/components/UserManagement";
 
 type Props = {
   user: User;
@@ -16,14 +17,17 @@ const Home: NextPage<Props> = ({ user }) => {
   const removeToken = () => {
     // remove token from cookie
     Cookies.remove("token");
-    router.push('/login');
+    router.push("/login");
   };
   return (
     <Layout>
-      <StyledHeader>
-      <p>Hello {user.username}</p>
-      <StyledButton onClick={removeToken}>Log Out</StyledButton>
-      </StyledHeader>
+      <Container>
+        <StyledHeader>
+          <p>Hello {user.name}</p>
+          <StyledButton onClick={removeToken}>Log Out</StyledButton>
+        </StyledHeader>
+        <UserManagement user={user} />
+      </Container>
     </Layout>
   );
 };
@@ -77,3 +81,9 @@ const StyledHeader = styled.div`
   align-items: center;
 `;
 
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;

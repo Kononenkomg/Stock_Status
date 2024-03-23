@@ -4,20 +4,26 @@ export const USERS = [
         name: 'John',
         email: 'jhon@painters.com',
         password: '123456',
-        role: 'painter'
+        role: 'painter',
+        permissions: ['painter:read'],
+        disabled: false
     },
     {
         id: 2,
         name: 'Jane',
         email: 'jane@painters.com',
         password: '123456',
-        role: 'manager'
+        role: 'manager',
+        permissions: ['painter:read', 'painter:write'],
+        disabled: false
     },
     {
         id: 3,
         name: 'Adam',
-        email: 'adam@painters.conm',
+        email: 'adam@painters.com',
         password: '123456',
-        role: 'admin'
+        role: 'admin',
+        permissions: ['admin:read', 'admin:write'],
+        disabled: false
     }
 ]   
