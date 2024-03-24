@@ -7,7 +7,7 @@ import superjson from 'superjson'
 import nextConfig from 'next.config.js'
 import Head from 'next/head'
 
-// const basePath = String(nextConfig.basePath)
+const basePath = String(nextConfig.basePath)
 
 const getBasePath = (): string => {
   if (process.env.NEXT_PUBLIC_STAGE === 'development') {
