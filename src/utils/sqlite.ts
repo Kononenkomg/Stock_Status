@@ -153,3 +153,23 @@ export function getAllPaints(db: sqlite3.Database) {
     })
   })
 }
+
+export function updatePaintStock(
+  db: sqlite3.Database,
+  paintId: number,
+  newStock: string
+) {
+  return new Promise<void>((resolve, reject) => {
+    db.run(
+      `UPDATE paints SET stock = ? WHERE id = ?`,
+      [newStock, paintId],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
