@@ -36,6 +36,7 @@ const Login: NextPage = () => {
     <Layout>
       <LoginContainer>
         {/* TODO: remove once done with dev */}
+        <h2>Users:</h2>
         <ul>
           {USERS.map((user) => (
             <li key={user.email}>{user.email}</li>
