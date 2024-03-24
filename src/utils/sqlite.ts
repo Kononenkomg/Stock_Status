@@ -4,39 +4,18 @@ import path from 'path'
 import sqlite3 from 'sqlite3'
 import { Database } from 'sqlite3'
 import { PAINTS } from '@/constants/paint'
+import { Database as RemoteDatabase } from '@sqlitecloud/drivers'
+import { SQLightLogin } from '@/constants/secret'
+
+// export function openDB() {
+//   const dbPath = path.resolve(__dirname, 'myDatabase.db')
+//   return new RemoteDatabase(`sqlitecloud://${SQLightLogin}:${SQLightPassword}@xxx.sqlite.cloud:8860/chinook.sqlite`)
+// }
 
 export function openDB() {
   const dbPath = path.resolve(__dirname, 'myDatabase.db')
   return new Database(dbPath)
 }
-
-// export function initialSetUp(db: sqlite3.Database) {
-//   db.serialize(() => {
-//     db.run(
-//       'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, password TEXT, role TEXT, permissions TEXT, disabled INTEGER)'
-//     )
-
-//     USERS.forEach((user) => {
-//       db.run(
-//         `INSERT INTO users (id, name, email, password, role, permissions, disabled) VALUES (${
-//           user.id
-//         }, "${user.name}", "${user.email}", "${user.password}", "${
-//           user.role
-//         }", '${JSON.stringify(user.permissions)}', ${user.disabled ? 1 : 0})`
-//       )
-//     })
-
-//     db.run(
-//       'CREATE TABLE paints (id INTEGER PRIMARY KEY, name TEXT, color TEXT, stock INTEGER, price REAL)'
-//     )
-
-//     PAINTS.forEach((paint) => {
-//       db.run(
-//         `INSERT INTO paints (id, name, color, stock, price) VALUES (${paint.id}, "${paint.name}", "${paint.color}", ${paint.stock}, ${paint.price})`
-//       )
-//     })
-//   })
-// }
 
 export function initialSetUp(db: Database): Promise<void> {
   return new Promise((resolve, reject) => {

@@ -10,6 +10,7 @@
     "prettier:check": "prettier --check src/**/*.ts"
   },
   "dependencies": {
+    "@sqlitecloud/drivers": "^0.0.56",
     "@tanstack/react-query": "^4.20.9",
     "@trpc/client": "^10.7.0",
     "@trpc/next": "^10.7.0",
