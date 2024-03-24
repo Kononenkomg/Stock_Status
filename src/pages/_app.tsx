@@ -6,14 +6,17 @@ import { httpBatchLink } from '@trpc/client'
 import superjson from 'superjson'
 import nextConfig from 'next.config.js'
 import Head from 'next/head'
-import dotenv from 'dotenv';
-dotenv.config();
 
 // const basePath = String(nextConfig.basePath)
-const basePath = process.env.STAGE === 'development' ? '' : 'https://stock-status-ruddy.vercel.app'
 
+const getBasePath = (): string => {
+  if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+    return ''
+  } else {
+    return 'https://stock-status-ruddy.vercel.app'
+  }
+}
 const MyApp = ({ Component, pageProps }: AppProps): ReactElement | null => {
-
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -24,19 +27,20 @@ const MyApp = ({ Component, pageProps }: AppProps): ReactElement | null => {
             refetchOnReconnect: false,
             keepPreviousData: true,
             retry: 1,
-            cacheTime: 1000 * 60 * 60 * 24 * 7
-          }
-        }
+            cacheTime: 1000 * 60 * 60 * 24 * 7,
+          },
+        },
       })
   )
+
   const [trpcClient] = useState(() =>
     trpc.createClient({
       transformer: superjson,
       links: [
         httpBatchLink({
-          url: `${basePath}/api/trpc`
-        })
-      ]
+          url: `${getBasePath()}/api/trpc`,
+        }),
+      ],
     })
   )
 
@@ -46,7 +50,7 @@ const MyApp = ({ Component, pageProps }: AppProps): ReactElement | null => {
         <title>Next.js + TRPC + React Query</title>
       </Head>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient} >
+        <QueryClientProvider client={queryClient}>
           <Component {...pageProps} />
         </QueryClientProvider>
       </trpc.Provider>
