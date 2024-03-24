@@ -39,6 +39,12 @@ const MyApp = ({ Component, pageProps }: AppProps): ReactElement | null => {
       links: [
         httpBatchLink({
           url: `${getBasePath()}/api/trpc`,
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            })
+          },
         }),
       ],
     })
