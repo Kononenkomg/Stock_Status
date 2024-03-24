@@ -1,5 +1,6 @@
 import { procedure, router } from '../trpc'
 import { authRouter } from './auth'
+import { paintRouter } from './paints'
 import { userRouter } from './users'
 
 export const appRouter = router({
@@ -7,7 +8,8 @@ export const appRouter = router({
     return { ok: 'Up' }
   }),
   auth: authRouter,
-  user: userRouter
+  user: userRouter,
+  paint: paintRouter,
 })
 
 export type AppRouter = typeof appRouter
