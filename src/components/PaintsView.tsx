@@ -1,6 +1,6 @@
 import { User } from '@/types'
 import { trpc } from '@/utils/trpc'
-import { FunctionComponent } from 'react'
+import { FunctionComponent, useState } from 'react'
 import Cookies from 'js-cookie'
 import styled from 'styled-components'
 
@@ -9,16 +9,39 @@ type Props = {
 }
 
 export const PaintsView: FunctionComponent<Props> = ({ user }) => {
+  const [stock, setStock] = useState('0')
   const userPermissions = user.permissions
   if (user.disabled || !userPermissions.includes('painter:read')) return null
   const token = Cookies.get('token')
   if (!token) return null
 
+  const isAllowEdit = userPermissions.includes('painter:write')
+
   const { data } = trpc.paint.getAll.useQuery({
     token,
   })
 
+  const updatePaintStock = trpc.paint.updatePaintStock.useMutation()
+
   if (!data) return null
+
+  const saveNewStockNumber = (paintId: number, newStock: string) => {
+    updatePaintStock.mutate(
+      {
+        token,
+        paintId,
+        newStock,
+      },
+      {
+        onSuccess: () => {
+          alert('Stock updated')
+        },
+        onError: (err) => {
+          alert(err.message)
+        },
+      }
+    )
+  }
   return (
     <>
       <h2>Paints</h2>
@@ -37,7 +60,20 @@ export const PaintsView: FunctionComponent<Props> = ({ user }) => {
               <StyledTableCell>{paint.name}</StyledTableCell>
               <StyledTableCell>{paint.color}</StyledTableCell>
               <StyledTableCell>{paint.price}</StyledTableCell>
-              <StyledTableCell>{paint.stock}</StyledTableCell>
+              {isAllowEdit ? (
+                <StyledTableCell>
+                  <input
+                    type="number"
+                    defaultValue={paint.stock}
+                    onChange={(e) => setStock(e.target.value)}
+                  />
+                  <button onClick={() => saveNewStockNumber(paint.id, stock)}>
+                    Save
+                  </button>
+                </StyledTableCell>
+              ) : (
+                <StyledTableCell>{paint.stock}</StyledTableCell>
+              )}
             </tr>
           ))}
         </tbody>
