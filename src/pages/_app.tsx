@@ -4,10 +4,7 @@ import { trpc } from '@/utils/trpc'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
 import superjson from 'superjson'
-import nextConfig from 'next.config.js'
 import Head from 'next/head'
-
-const basePath = String(nextConfig.basePath)
 
 const getBasePath = (): string => {
   if (process.env.NEXT_PUBLIC_STAGE === 'development') {
