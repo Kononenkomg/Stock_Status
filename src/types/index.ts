@@ -14,3 +14,12 @@ export type Paint = {
   price: number
   stock: number
 }
+
+export type Order = {
+  id: number
+  userId: number
+  paintId: number
+  quantity: number
+  date: string
+  status: 'pending' | 'completed' | 'cancelled'
+}

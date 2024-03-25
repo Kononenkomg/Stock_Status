@@ -48,6 +48,7 @@ export const PaintsView: FunctionComponent<Props> = ({ user }) => {
       <StyledTable>
         <thead>
           <tr>
+            <StyledTableHeader>ID</StyledTableHeader>
             <StyledTableHeader>Name</StyledTableHeader>
             <StyledTableHeader>Color</StyledTableHeader>
             <StyledTableHeader>Price</StyledTableHeader>
@@ -57,6 +58,7 @@ export const PaintsView: FunctionComponent<Props> = ({ user }) => {
         <tbody>
           {data?.map((paint) => (
             <tr key={paint.id}>
+              <StyledTableCell>{paint.id}</StyledTableCell>
               <StyledTableCell>{paint.name}</StyledTableCell>
               <StyledTableCell>{paint.color}</StyledTableCell>
               <StyledTableCell>{paint.price}</StyledTableCell>
