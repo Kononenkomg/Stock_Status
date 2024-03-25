@@ -4,16 +4,12 @@ import path from 'path'
 import sqlite3 from 'sqlite3'
 import { Database } from 'sqlite3'
 import { PAINTS } from '@/constants/paint'
-import { Database as RemoteDatabase } from '@sqlitecloud/drivers'
-import { SQLightLogin } from '@/constants/secret'
-
-// export function openDB() {
-//   const dbPath = path.resolve(__dirname, 'myDatabase.db')
-//   return new RemoteDatabase(`sqlitecloud://${SQLightLogin}:${SQLightPassword}@xxx.sqlite.cloud:8860/chinook.sqlite`)
-// }
 
 export function openDB() {
-  const dbPath = path.resolve(__dirname, 'myDatabase.db')
+  const dbPath =
+    process.env.NEXT_PUBLIC_STAGE === 'development'
+      ? path.resolve(process.cwd(), 'public', 'myDatabase.db')
+      : `https://stock-status-ruddy.vercel.app/myDatabase.db`
   return new Database(dbPath)
 }
 
