@@ -35,14 +35,6 @@ const Login: NextPage = () => {
   return (
     <Layout>
       <LoginContainer>
-        {/* TODO: remove once done with dev */}
-        <h2>Users!:</h2>
-        <ul>
-          {USERS.map((user) => (
-            <li key={user.email}>{user.email}</li>
-          ))}
-        </ul>
-        <h1>Login</h1>
         <StyledForm onSubmit={handleSubmit}>
           <label>Email:</label>
           <input
