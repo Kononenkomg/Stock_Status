@@ -5,7 +5,6 @@ import { trpc } from '@/utils/trpc'
 import { useState } from 'react'
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/router'
-import { USERS } from '@/constants/users'
 
 const Login: NextPage = () => {
   const router = useRouter()
