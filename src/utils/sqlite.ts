@@ -1,65 +1,45 @@
 import { USERS } from '@/constants/users'
 import { User } from '@/types'
-import path from 'path'
-import sqlite3 from 'sqlite3'
-import { Database } from 'sqlite3'
 import { PAINTS } from '@/constants/paint'
+import { Database } from '@sqlitecloud/drivers'
 
 export function openDB() {
-  const dbPath =
-    process.env.NEXT_PUBLIC_STAGE === 'development'
-      ? path.resolve(process.cwd(), 'public', 'myDatabase.db')
-      : `https://stock-status-ruddy.vercel.app/myDatabase.db`
-  return new Database(dbPath)
+  return new Database(
+    `sqlitecloud://${process.env.NEXT_PUBLIC_SQLITE_USER}:${process.env.NEXT_PUBLIC_SQLITE_PASSWORD}@cjjeucu1sz.sqlite.cloud:8860/paintstock`
+  )
 }
 
 export function initialSetUp(db: Database): Promise<void> {
   return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run(
-        'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, password TEXT, role TEXT, permissions TEXT, disabled INTEGER)',
-        (err) => {
-          if (err) return reject(err)
-
-          USERS.forEach((user) => {
-            db.run(
-              `INSERT INTO users (id, name, email, password, role, permissions, disabled) VALUES (${
-                user.id
-              }, "${user.name}", "${user.email}", "${user.password}", "${
-                user.role
-              }", '${JSON.stringify(user.permissions)}', ${
-                user.disabled ? 1 : 0
-              })`,
-              (err) => {
-                if (err) return reject(err)
-              }
-            )
-          })
-
-          db.run(
-            'CREATE TABLE paints (id INTEGER PRIMARY KEY, name TEXT, color TEXT, stock INTEGER, price REAL)',
-            (err) => {
-              if (err) return reject(err)
-
-              PAINTS.forEach((paint) => {
-                db.run(
-                  `INSERT INTO paints (id, name, color, stock, price) VALUES (${paint.id}, "${paint.name}", "${paint.color}", ${paint.stock}, ${paint.price})`,
-                  (err) => {
-                    if (err) return reject(err)
-                  }
-                )
-              })
-
-              resolve()
-            }
-          )
-        }
+    try {
+      db.sql(
+        'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, password TEXT, role TEXT, permissions TEXT, disabled INTEGER)'
       )
-    })
+      db.sql(
+        'CREATE TABLE paints (id INTEGER PRIMARY KEY, name TEXT, color TEXT, stock INTEGER, price REAL)'
+      )
+      USERS.forEach((user) => {
+        db.sql(
+          `INSERT INTO users (id, name, email, password, role, permissions, disabled) VALUES (${
+            user.id
+          }, "${user.name}", "${user.email}", "${user.password}", "${
+            user.role
+          }", '${JSON.stringify(user.permissions)}', ${user.disabled ? 1 : 0})`
+        )
+      })
+      PAINTS.forEach((paint) => {
+        db.sql(
+          `INSERT INTO paints (id, name, color, stock, price) VALUES (${paint.id}, "${paint.name}", "${paint.color}", ${paint.stock}, ${paint.price})`
+        )
+      })
+      resolve()
+    } catch (err) {
+      reject(err)
+    }
   })
 }
 
-export function isTableExists(db: sqlite3.Database, tableName: string) {
+export function isTableExists(db: Database, tableName: string) {
   return new Promise<boolean>((resolve, reject) => {
     db.get(
       `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}'`,
@@ -74,7 +54,7 @@ export function isTableExists(db: sqlite3.Database, tableName: string) {
   })
 }
 
-export function getUserByEmail(db: sqlite3.Database, email: string) {
+export function getUserByEmail(db: Database, email: string) {
   return new Promise<any>((resolve, reject) => {
     db.get(`SELECT * FROM users WHERE email='${email}'`, (err, row) => {
       if (err) {
@@ -86,10 +66,10 @@ export function getUserByEmail(db: sqlite3.Database, email: string) {
   })
 }
 
-export function getAllUsers(db: sqlite3.Database) {
+export function getAllUsers(db: Database) {
   return new Promise<any[]>((resolve, reject) => {
     db.all(`SELECT * FROM users`, (err, rows) => {
-      if (err) {
+      if (err || !rows) {
         reject(err)
       } else {
         resolve(rows)
@@ -98,7 +78,7 @@ export function getAllUsers(db: sqlite3.Database) {
   })
 }
 
-export function updateUser(db: sqlite3.Database, user: User) {
+export function updateUser(db: Database, user: User) {
   return new Promise<void>((resolve, reject) => {
     db.run(
       `UPDATE users SET name="${user.name}", email="${user.email}", role="${
@@ -117,10 +97,10 @@ export function updateUser(db: sqlite3.Database, user: User) {
   })
 }
 
-export function getAllPaints(db: sqlite3.Database) {
+export function getAllPaints(db: Database) {
   return new Promise<any[]>((resolve, reject) => {
     db.all(`SELECT * FROM paints`, (err, rows) => {
-      if (err) {
+      if (err || !rows) {
         reject(err)
       } else {
         resolve(rows)
@@ -130,7 +110,7 @@ export function getAllPaints(db: sqlite3.Database) {
 }
 
 export function updatePaintStock(
-  db: sqlite3.Database,
+  db: Database,
   paintId: number,
   newStock: string
 ) {
