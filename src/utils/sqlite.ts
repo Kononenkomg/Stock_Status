@@ -207,3 +207,18 @@ export function cancelOrder(db: Database, orderId: number) {
     )
   })
 }
+
+export function completeOrder(db: Database, orderId: number) {
+  return new Promise<void>((resolve, reject) => {
+    db.run(
+      `UPDATE orders SET status = 'completed' WHERE id = ${orderId}`,
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
