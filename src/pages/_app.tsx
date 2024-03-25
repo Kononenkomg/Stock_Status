@@ -50,7 +50,7 @@ const MyApp = ({ Component, pageProps }: AppProps): ReactElement | null => {
   return (
     <>
       <Head>
-        <title>Next.js + TRPC + React Query</title>
+        <title>Paint Stock Status</title>
       </Head>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
