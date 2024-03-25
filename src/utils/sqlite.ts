@@ -109,6 +109,28 @@ export function updateUser(db: Database, user: User) {
   })
 }
 
+export function createUser(
+  db: Database,
+  user: Omit<User, 'id'> & { password: string }
+) {
+  return new Promise<void>((resolve, reject) => {
+    db.run(
+      `INSERT INTO users (name, email, password, role, permissions, disabled) VALUES ("${
+        user.name
+      }", "${user.email}", "${user.password}", "${
+        user.role
+      }", '${JSON.stringify(user.permissions)}', ${user.disabled ? 1 : 0})`,
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
+
 export function getAllPaints(db: Database) {
   return new Promise<any[]>((resolve, reject) => {
     db.all(`SELECT * FROM paints`, (err, rows) => {
@@ -175,6 +197,21 @@ export function cancelOrder(db: Database, orderId: number) {
   return new Promise<void>((resolve, reject) => {
     db.run(
       `UPDATE orders SET status = 'cancelled' WHERE id = ${orderId}`,
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
+
+export function completeOrder(db: Database, orderId: number) {
+  return new Promise<void>((resolve, reject) => {
+    db.run(
+      `UPDATE orders SET status = 'completed' WHERE id = ${orderId}`,
       (err) => {
         if (err) {
           reject(err)

@@ -23,6 +23,7 @@ export const OrdersManagement: FunctionComponent<Props> = ({ user }) => {
 
   const createOrder = trpc.orders.createOrder.useMutation()
   const cancelOrder = trpc.orders.cancelOrder.useMutation()
+  const completeOrder = trpc.orders.completeOrder.useMutation()
 
   if (!data) return null
 
@@ -59,6 +60,24 @@ export const OrdersManagement: FunctionComponent<Props> = ({ user }) => {
       {
         onSuccess: () => {
           alert('Order cancelled')
+          router.reload()
+        },
+        onError: (err) => {
+          alert(err.message)
+        },
+      }
+    )
+  }
+
+  const handleCompleteOrder = (orderId: number) => {
+    completeOrder.mutate(
+      {
+        token,
+        orderId,
+      },
+      {
+        onSuccess: () => {
+          alert('Order completed')
           router.reload()
         },
         onError: (err) => {
@@ -116,6 +135,9 @@ export const OrdersManagement: FunctionComponent<Props> = ({ user }) => {
                 {order.status}{' '}
                 <button onClick={() => handleCancelOrder(order.id)}>
                   cancel
+                </button>
+                <button onClick={() => handleCompleteOrder(order.id)}>
+                  complete
                 </button>
               </StyledTableCell>
             </tr>
