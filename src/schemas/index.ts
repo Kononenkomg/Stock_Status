@@ -17,3 +17,16 @@ export const paintSchema = z.object({
   price: z.number(),
   stock: z.number(),
 })
+
+export const orderSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  paintId: z.number(),
+  quantity: z.number(),
+  date: z.string(),
+  status: z.union([
+    z.literal('pending'),
+    z.literal('completed'),
+    z.literal('cancelled'),
+  ]),
+})

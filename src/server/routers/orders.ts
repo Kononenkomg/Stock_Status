@@ -3,15 +3,17 @@ import { procedure, router } from '../trpc'
 import jwt from 'jsonwebtoken'
 import { SECRET_KEY } from '@/constants/secret'
 import {
-  getAllUsers,
+  cancelOrder,
+  createOrder,
+  createOrdersTable,
+  getAllOrders,
   getUserByEmail,
-  getUserById,
+  isTableExists,
   openDB,
-  updateUser,
 } from '@/utils/sqlite'
-import { userSchema } from '@/schemas'
+import { userSchema, orderSchema } from '@/schemas'
 
-export const userRouter = router({
+export const orderRouter = router({
   getAll: procedure
     .input(
       z.object({
@@ -24,11 +26,15 @@ export const userRouter = router({
         const decoded = jwt.verify(token, SECRET_KEY)
         if (typeof decoded !== 'string' && 'email' in decoded) {
           const db = openDB()
+          const isOrdersTable = await isTableExists(db, 'orders')
+
+          if (!isOrdersTable) {
+            await createOrdersTable(db)
+          }
 
           const user = await getUserByEmail(db, decoded.email)
           const validatedUser = userSchema.parse(user)
-
-          if (validatedUser.role !== 'admin') {
+          if (validatedUser.role !== 'manager') {
             db.close()
 
             throw new Error('Unauthorized')
@@ -40,59 +46,13 @@ export const userRouter = router({
             throw new Error('User is disabled')
           }
 
-          if (validatedUser.permissions.includes('admin:read')) {
-            const users = await getAllUsers(db)
-            const validatedUsers = users.map((user) => userSchema.parse(user))
-            db.close()
-            return validatedUsers
-          }
-        }
-        throw new Error('Invalid token')
-      } catch (err) {
-        // token is invalid
-        throw new Error('Invalid token')
-      }
-    }),
-  update: procedure
-    .input(
-      z.object({
-        token: z.string(),
-        users: z.array(userSchema.omit({ password: true })),
-      })
-    )
-    .mutation(async ({ input }) => {
-      const { token, users } = input
-      try {
-        const decoded = jwt.verify(token, SECRET_KEY)
-        if (typeof decoded !== 'string' && 'email' in decoded) {
-          const db = openDB()
-
-          const currentUser = await getUserByEmail(db, decoded.email)
-          const validatedCurrentUser = userSchema.parse(currentUser)
-
-          if (validatedCurrentUser.role !== 'admin') {
-            db.close()
-
-            throw new Error('Unauthorized')
-          }
-
-          if (validatedCurrentUser.disabled) {
-            db.close()
-
-            throw new Error('User is disabled')
-          }
-
-          if (validatedCurrentUser.permissions.includes('admin:write')) {
-            await Promise.all(
-              users.map((user) => {
-                updateUser(db, user)
-              })
+          if (validatedUser.role === 'manager') {
+            const orders = await getAllOrders(db)
+            const validatedOrders = orders.map((order) =>
+              orderSchema.parse(order)
             )
-
             db.close()
-            return {
-              status: 'ok',
-            }
+            return validatedOrders
           }
         }
         throw new Error('Invalid token')
@@ -101,40 +61,88 @@ export const userRouter = router({
         throw new Error('Invalid token')
       }
     }),
-  getUserNameById: procedure
+  createOrder: procedure
     .input(
       z.object({
         token: z.string(),
-        userId: z.number(),
+        paintId: z.number(),
+        quantity: z.number(),
       })
     )
     .mutation(async ({ input }) => {
-      const { token, userId } = input
+      const { token, paintId, quantity } = input
       try {
         const decoded = jwt.verify(token, SECRET_KEY)
         if (typeof decoded !== 'string' && 'email' in decoded) {
           const db = openDB()
 
-          const currentUser = await getUserByEmail(db, decoded.email)
-          const validatedCurrentUser = userSchema.parse(currentUser)
+          const user = await getUserByEmail(db, decoded.email)
+          const validatedUser = userSchema.parse(user)
 
-          if (validatedCurrentUser.role !== 'manager') {
+          if (validatedUser.role !== 'manager') {
             db.close()
 
             throw new Error('Unauthorized')
           }
 
-          if (validatedCurrentUser.disabled) {
+          if (validatedUser.disabled) {
             db.close()
 
             throw new Error('User is disabled')
           }
 
-          if (validatedCurrentUser.permissions.includes('admin:read')) {
-            const user = await getUserById(db, userId)
-            const validatedUser = userSchema.parse(user)
+          await createOrder(db, {
+            id: Math.floor(Math.random() * 1000),
+            userId: validatedUser.id,
+            paintId,
+            quantity,
+            date: new Date().toISOString(),
+            status: 'pending',
+          })
+          db.close()
+          return {
+            status: 'ok',
+          }
+        }
+        throw new Error('Invalid token')
+      } catch (err) {
+        // token is invalid
+        throw new Error('Invalid token')
+      }
+    }),
+  cancelOrder: procedure
+    .input(
+      z.object({
+        token: z.string(),
+        orderId: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { token, orderId } = input
+      try {
+        const decoded = jwt.verify(token, SECRET_KEY)
+        if (typeof decoded !== 'string' && 'email' in decoded) {
+          const db = openDB()
+
+          const user = await getUserByEmail(db, decoded.email)
+          const validatedUser = userSchema.parse(user)
+
+          if (validatedUser.role !== 'manager') {
             db.close()
-            return { userName: validatedUser.name }
+
+            throw new Error('Unauthorized')
+          }
+
+          if (validatedUser.disabled) {
+            db.close()
+
+            throw new Error('User is disabled')
+          }
+
+          await cancelOrder(db, orderId)
+          db.close()
+          return {
+            status: 'ok',
           }
         }
         throw new Error('Invalid token')

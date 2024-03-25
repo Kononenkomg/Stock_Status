@@ -1,5 +1,5 @@
 import { USERS } from '@/constants/users'
-import { User } from '@/types'
+import { Order, User } from '@/types'
 import { PAINTS } from '@/constants/paint'
 import { Database } from '@sqlitecloud/drivers'
 
@@ -66,6 +66,18 @@ export function getUserByEmail(db: Database, email: string) {
   })
 }
 
+export function getUserById(db: Database, id: number) {
+  return new Promise<any>((resolve, reject) => {
+    db.get(`SELECT * FROM users WHERE id=${id}`, (err, row) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(row)
+      }
+    })
+  })
+}
+
 export function getAllUsers(db: Database) {
   return new Promise<any[]>((resolve, reject) => {
     db.all(`SELECT * FROM users`, (err, rows) => {
@@ -118,6 +130,51 @@ export function updatePaintStock(
     db.run(
       `UPDATE paints SET stock = ? WHERE id = ?`,
       [newStock, paintId],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
+
+export function createOrdersTable(db: Database) {
+  return new Promise<void>((resolve, reject) => {
+    db.sql(
+      'CREATE TABLE orders (id INTEGER PRIMARY KEY, userId INTEGER, paintId INTEGER, quantity INTEGER, date TEXT, status TEXT)'
+    )
+    resolve()
+  })
+}
+
+export function createOrder(db: Database, order: Order) {
+  return new Promise<void>((resolve, reject) => {
+    db.sql(
+      `INSERT INTO orders (userId, paintId, quantity, date, status) VALUES (${order.userId}, ${order.paintId}, ${order.quantity}, "${order.date}", "${order.status}")`
+    )
+    resolve()
+  })
+}
+
+export function getAllOrders(db: Database) {
+  return new Promise<any[]>((resolve, reject) => {
+    db.all(`SELECT * FROM orders`, (err, rows) => {
+      if (err || !rows) {
+        reject(err)
+      } else {
+        resolve(rows)
+      }
+    })
+  })
+}
+
+export function cancelOrder(db: Database, orderId: number) {
+  return new Promise<void>((resolve, reject) => {
+    db.run(
+      `UPDATE orders SET status = 'cancelled' WHERE id = ${orderId}`,
       (err) => {
         if (err) {
           reject(err)

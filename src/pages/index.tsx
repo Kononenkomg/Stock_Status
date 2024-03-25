@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import { UserManagement } from '@/components/UserManagement'
 import { PaintsView } from '@/components/PaintsView'
+import { OrdersManagement } from '@/components/OrdersManagement'
 
 type Props = {
   user: User
@@ -29,6 +30,7 @@ const Home: NextPage<Props> = ({ user }) => {
         </StyledHeader>
         <UserManagement user={user} />
         <PaintsView user={user} />
+        <OrdersManagement user={user} />
       </Container>
     </Layout>
   )
